@@ -19,7 +19,8 @@ setup(
         "scikit-learn",
         "seaborn",
         "matplotlib",
-        "graphviz"
+        "graphviz",
+        "inspect"
     ],
     extras_require={
         'svg': ["cairosvg"]

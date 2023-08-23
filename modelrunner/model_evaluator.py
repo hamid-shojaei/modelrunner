@@ -1,3 +1,5 @@
+from inspect import signature
+
 import pandas as pd
 import numpy as np
 
@@ -10,6 +12,8 @@ from sklearn.metrics import confusion_matrix, accuracy_score
 from sklearn.preprocessing import LabelEncoder
 from sklearn.model_selection import train_test_split
 from sklearn.tree import export_graphviz
+from sklearn.svm import SVC
+from sklearn.ensemble import GradientBoostingClassifier
 
 import graphviz
 
@@ -24,7 +28,7 @@ from PIL import Image
 sns.set_theme()
 
 class ModelEvaluator:
-    def __init__(self, X, y, hyperparameters, test_size=0.2):
+    def __init__(self, X, y, hyperparameters, test_size=0.2, random_state=42):
         """
         X: features dataframe
         y: target series/dataframe
@@ -33,7 +37,7 @@ class ModelEvaluator:
         """
         self.X, self.encoders = self._label_encode_dataframe(X)
         self.y = y
-        self.X_train, self.X_test, self.y_train, self.y_test = train_test_split(self.X, self.y, test_size=test_size, random_state=42)
+        self.X_train, self.X_test, self.y_train, self.y_test = train_test_split(self.X, self.y, test_size=test_size, random_state=random_state)
         self.hyperparameters = hyperparameters
         self.models = {}
         self.predictions = {}
@@ -57,17 +61,107 @@ class ModelEvaluator:
         """
         Initialize the model based on the algorithm and hyperparameters
         """
-        if params["algorithm"] == "DecisionTree":
-            return DecisionTreeClassifier(max_depth=params.get("max_depth", None),
-                                          min_samples_leaf=params.get("min_samples_leaf", 1))
-        
-        elif params["algorithm"] == "RandomForest":
-            return RandomForestClassifier(n_estimators=params.get("num_trees", 100),
-                                          max_depth=params.get("max_depth", None),
-                                          min_samples_leaf=params.get("min_samples_leaf", 1))
+
+        # Default parameters for each classifier
+        defaults = {
+            "DecisionTree": {
+                'criterion': 'gini',
+                'splitter': 'best',
+                'max_depth': None,
+                'min_samples_split': 2,
+                'min_samples_leaf': 1,
+                'min_weight_fraction_leaf': 0.0,
+                'max_features': None,
+                'random_state': None,
+                'max_leaf_nodes': None,
+                'min_impurity_decrease': 0.0,
+                'class_weight': None,
+                'ccp_alpha': 0.0
+            },
+            "RandomForest": {
+                'n_estimators': 100,
+                'criterion': 'gini',
+                'max_depth': None,
+                'min_samples_split': 2,
+                'min_samples_leaf': 1,
+                'min_weight_fraction_leaf': 0.0,
+                'max_features': 'sqrt',
+                'max_leaf_nodes': None,
+                'min_impurity_decrease': 0.0,
+                'bootstrap': True,
+                'oob_score': False,
+                'n_jobs': None,
+                'random_state': None,
+                'verbose': 0,
+                'warm_start': False,
+                'class_weight': None,
+                'ccp_alpha': 0.0,
+                'max_samples': None
+            },
+            "SVM": {
+                'C': 1.0,
+                'kernel': 'rbf',
+                'degree': 3,
+                'gamma': 'scale',
+                'coef0': 0.0,
+                'shrinking': True,
+                'probability': False,
+                'tol': 0.001,
+                'cache_size': 200,
+                'class_weight': None,
+                'verbose': False,
+                'max_iter': -1,
+                'decision_function_shape': 'ovr',
+                'break_ties': False,
+                'random_state': None
+            },
+            "GradientBoosting": {
+                'loss': 'deviance',
+                'learning_rate': 0.1,
+                'n_estimators': 100,
+                'subsample': 1.0,
+                'criterion': 'friedman_mse',
+                'min_samples_split': 2,
+                'min_samples_leaf': 1,
+                'min_weight_fraction_leaf': 0.0,
+                'max_depth': 3,
+                'min_impurity_decrease': 0.0,
+                'min_impurity_split': None,
+                'init': None,
+                'random_state': None,
+                'max_features': None,
+                'verbose': 0,
+                'max_leaf_nodes': None,
+                'warm_start': False,
+                'validation_fraction': 0.1,
+                'n_iter_no_change': None,
+                'tol': 0.0001,
+                'ccp_alpha': 0.0
+            }
+        }
+
+        classifier_mapping = {
+            "DecisionTree": DecisionTreeClassifier,
+            "RandomForest": RandomForestClassifier,
+            "SVM": SVC,
+            "GradientBoosting": GradientBoostingClassifier
+        }
+
+        alg = params["algorithm"]
+
+        # Update defaults with provided parameters and filter out invalid parameters
+        valid_params = {k: v for k, v in {**defaults[alg], **params}.items() if k in signature(classifier_mapping[alg]).parameters}
+
+        if alg == "DecisionTree":
+            return DecisionTreeClassifier(**valid_params)
+        elif alg == "RandomForest":
+            return RandomForestClassifier(**valid_params)
+        elif alg == "SVM":
+            return SVC(**valid_params)
+        elif alg == "GradientBoosting":
+            return GradientBoostingClassifier(**valid_params)
         else:
-            raise ValueError(f"Unsupported algorithm: {params['algorithm']}")
-    
+            raise ValueError(f"Unsupported algorithm: {params['algorithm']}")    
     def run_models(self):
         """
         Train models based on the provided hyperparameters and predict on the test set
@@ -82,6 +176,7 @@ class ModelEvaluator:
             # Check if the model has feature_importances_ attribute
             if hasattr(model, "feature_importances_"):
                 self.feature_importances[model_name] = model.feature_importances_
+            print(f"{model_name} is finished.")
     
     def get_predictions(self, model_name):
         return self.predictions.get(model_name, None)
