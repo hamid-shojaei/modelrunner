@@ -16,7 +16,10 @@ setup(
     install_requires=[
         "pandas",
         "numpy",
-        ...
+        "scikit-learn",
+        "seaborn",
+        "matplotlib",
+        "graphviz"
     ],
     extras_require={
         'svg': ["cairosvg"]

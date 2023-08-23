@@ -156,28 +156,3 @@ class ModelEvaluator:
                                    special_characters=True)  
         graph = graphviz.Source(dot_data)  
         return graph
-
-def display_svg_with_zoom(graph, width_zoom_percent=100, height_zoom_percent=100):
-    """
-    Display a graphviz object in Jupyter with specified zoom percents for width and height, using PNG conversion.
-    
-    Parameters:
-    - graph: A graphviz.Source object.
-    - width_zoom_percent: The zoom percentage for width. 100 means no zoom.
-    - height_zoom_percent: The zoom percentage for height. 100 means no zoom.
-    """
-    # Convert the graphviz Source object to an SVG string
-    svg_str = graph.pipe(format='svg').decode('utf-8')
-    
-    # Use cairosvg to convert SVG string to PNG
-    output = BytesIO()
-    cairosvg.svg2png(bytestring=svg_str.encode('utf-8'), write_to=output)
-    
-    # Load the PNG image with PIL and display with desired zoom
-    img = Image.open(output)
-    width, height = img.size
-    new_width = int(width * (width_zoom_percent / 100))
-    new_height = int(height * (height_zoom_percent / 100))
-    img_resized = img.resize((new_width, new_height))
-    
-    display(img_resized)
