@@ -47,6 +47,34 @@ predictions = evaluator.get_predictions("classification_tree")
 feature_importances = evaluator.get_feature_importances("classification_tree")
 ```
 
+## Additional Installation Steps for SVG Functionality
+
+To use SVG-related functionalities in `ModelRunner`, you'll need to install `cairosvg`. This package has its own dependencies, and depending on your system, you might need to install additional libraries.
+
+### For Ubuntu/Debian:
+
+```bash
+sudo apt-get install libcairo2
+```
+### For macOS:
+If you have Homebrew installed:
+
+```bash
+brew install cairo
+```
+
+After these system-level installations, you can install `cairosvg` via pip:
+
+```bash
+pip install cairosvg
+```
+
+Or simply install the SVG extras with ModelRunner:
+
+```bash
+pip install modelrunner[svg]
+```
+
 ## Advanced Visualizations
 Visualize your decision trees:
 
