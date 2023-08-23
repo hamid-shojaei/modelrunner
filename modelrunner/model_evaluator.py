@@ -15,12 +15,6 @@ import graphviz
 
 from xml.etree import ElementTree as ET
 from IPython.display import display, SVG
-try:
-    import cairosvg
-except:
-    ! sudo apt-get install libcairo2 libpango-1.0-0 libpangocairo-1.0-0 libgdk-pixbuf2.0-0 libffi-dev shared-mime-info
-    ! pip install cairosvg
-    import cairosvg
 
 from .utils import display_svg_with_zoom
 
