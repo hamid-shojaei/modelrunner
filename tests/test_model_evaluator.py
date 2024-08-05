@@ -28,5 +28,5 @@ def test_model_evaluation():
     assert predictions is not None
     assert len(predictions) == len(y)
 
-    # More tests can be added here for other methods and functionalities
+    # More tests can be added here for other methods and functionalities for this
 
