@@ -29,6 +29,7 @@ Initialize the ModelEvaluator with your data and desired models:
 ```python
 from modelrunner import ModelEvaluator
 
+
 hyperparameters = {
     "classification_tree": {
         "algorithm": "DecisionTree",
